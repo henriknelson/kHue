@@ -9,11 +9,11 @@ import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
 
 /**
- * Created by henrik on 2017-08-12.
+ * Created by Henrik Nelson on 2017-08-12.
  */
 class Group(val name: String, val lights: Array<String>,val type:Type,val action: GroupAction) {
 
-    var groupId: String? = ""
+    var groupId: String = ""
 
     enum class Class(val className: String) {
         @SerializedName("Living room")  LIVING_ROOM("Living room"),
@@ -63,26 +63,6 @@ class Group(val name: String, val lights: Array<String>,val type:Type,val action
         override fun deserialize(content: String) : Group{
             val group = Gson().fromJson<Group>(content, Group::class.java)
             return group
-        }
-    }
-
-    //API 2.5
-    fun setState(on: Boolean? = null, brightness: Int? = null, saturation: Int? = null, ct:Int? = null, xy:List<Float>? = null, transitiontime:Int = 4 )
-    {
-        val paramsJson = Gson().toJson(
-                mapOf("on" to on,"bri" to brightness,"sat" to saturation, "ct" to ct, "xy" to xy, "transitiontime" to transitiontime ).
-                        filterValues { value -> value != null })
-        try{
-            Fuel.put("/groups/$groupId/action").body(paramsJson).responseJson { request, response, result ->
-                val (value, error) = result
-                if (value != null) {
-                    Log.d("Bridge", value.toString())
-                } else {
-                    Log.d("Bridge", "ERROR")
-                }
-            }
-        }catch(e:Exception){
-            Log.d("Bridge","Error: $e")
         }
     }
 

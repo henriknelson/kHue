@@ -1,16 +1,10 @@
-package nu.cliffords.khue.classes
+package nu.cliffords.khue
 
-import android.os.Parcel
-import android.os.Parcelable
 import android.util.Log
-import android.view.View
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.android.core.Json
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelManager
 import com.google.gson.Gson
-import nu.cliffords.khue.interfaces.BridgeReceiver
-import nu.cliffords.khue.interfaces.ConfigReceiver
 import org.json.JSONArray
 
 /**
@@ -32,17 +26,14 @@ class Bridge(val ipAddress: String,val userName: String) {
         }
     }
 
-    // Lights
+    // -------------Lights-------------
 
     //API 1.1 - Get all lights
-    fun getLights(receiver: BridgeReceiver) {
+    fun getLights(listener: (List<Light>) -> Unit) {
         Fuel.get("/lights").responseObject(Light.ListDeserializer()) { request, response, result ->
-        val (lights, error) = result
-        if (lights != null)
-            receiver.onLightsFound(lights)
-        else
-            receiver.onError(error.toString())
-
+            val (lights, error) = result
+            if (lights != null)
+                listener(lights)
         }
     }
 
@@ -68,7 +59,7 @@ class Bridge(val ipAddress: String,val userName: String) {
     }
 
     //API 1.4 - Get light attribute and state
-    fun getLight(lightId: String?,
+    fun getLight(lightId: String,
                  listener: (Light) -> Unit ) {
 
         Fuel.get("/lights/$lightId").responseObject(Light.Deserializer()) { request, response, result ->
@@ -77,10 +68,38 @@ class Bridge(val ipAddress: String,val userName: String) {
             if (light != null){
                 light.lightId = lightId
                 listener(light)
-            } else {
-                //Todo
             }
+        }
+    }
 
+    //API 1.5 - Set light attributes (rename)
+    fun setLightAttributes(lightId: String,
+                name: String,
+                listener: (JSONArray) -> Unit) {
+
+        val paramsJson = Gson().toJson(name)
+
+        Fuel.put("/lights/$lightId").body(paramsJson).responseJson { request, response, result ->
+            val (json, error) = result
+            if (json != null)
+                listener(json.array())
+        }
+    }
+
+    //API 1.6 - Set light state
+    fun setLightState(lightId: String,
+                      on: Boolean? = null, brightness: Int? = null, saturation: Int? = null, ct:Int? = null, xy:List<Float>? = null, transitiontime:Int = 4,
+                      listener: (JSONArray) -> Unit)
+    {
+
+        val paramsJson = Gson().toJson(
+                mapOf("on" to on,"bri" to brightness,"sat" to saturation, "ct" to ct, "xy" to xy, "transitiontime" to transitiontime ).
+                        filterValues { param -> param != null })
+
+        Fuel.put("/lights/$lightId/state").body(paramsJson).responseJson { request, response, result ->
+            val (json, error) = result
+            if (json != null)
+                listener(json.array())
         }
     }
 
@@ -98,14 +117,11 @@ class Bridge(val ipAddress: String,val userName: String) {
     //Groups
 
     //API 2.1 - Get all groups
-    fun getGroups(receiver: BridgeReceiver) {
+    fun getGroups(listener: (List<Group>) -> Unit) {
         Fuel.get("/groups").responseObject(Group.ListDeserializer()) { request, response, result ->
             val (groups, error) = result
-            if (groups != null) {
-                receiver.onGroupsFound(groups)
-            }else {
-                receiver.onError(error.toString())
-            }
+            if (groups != null)
+                listener(groups)
         }
     }
 
@@ -123,7 +139,7 @@ class Bridge(val ipAddress: String,val userName: String) {
     }
 
     //API 2.3 - Get group attributes
-    fun getGroup(groupId: String?,
+    fun getGroup(groupId: String,
                  listener: (Group) -> Unit) {
 
         Fuel.get("/groups/$groupId").responseObject(Group.Deserializer()) { request, response, result ->
@@ -133,17 +149,32 @@ class Bridge(val ipAddress: String,val userName: String) {
                 listener(group)
             }
         }
-
     }
 
     //API 2.4 - Set group attributes
-    fun setGroupAttributes(groupId: String?, name: String, lights: Array<String>, groupClass: Group.Class,
+    fun setGroupAttributes(groupId: String,
+                           name: String, lights: Array<String>, groupClass: Group.Class,
                            listener: (JSONArray) -> Unit) {
 
         val jsonParams = Gson().toJson(mapOf("name" to name, "lights" to lights, "class" to groupClass))
 
         Fuel.put("/groups/$groupId").body(jsonParams).responseJson { request, response, result ->
             val (json,error) = result
+            if (json != null)
+                listener(json.array())
+        }
+    }
+
+    //API 2.5 - Set group state
+    fun setGroupState(groupId: String,
+                 on: Boolean? = null, brightness: Int? = null, saturation: Int? = null, ct:Int? = null, xy:List<Float>? = null, transitiontime:Int = 4,
+                 listener: (JSONArray) -> Unit)
+    {
+        val paramsJson = Gson().toJson(
+                mapOf("on" to on,"bri" to brightness,"sat" to saturation, "ct" to ct, "xy" to xy, "transitiontime" to transitiontime ).
+                        filterValues { value -> value != null })
+        Fuel.put("/groups/$groupId/action").body(paramsJson).responseJson { request, response, result ->
+            val (json, error) = result
             if (json != null)
                 listener(json.array())
         }
@@ -164,13 +195,11 @@ class Bridge(val ipAddress: String,val userName: String) {
 
 
     //Config
-    fun getConfig(receiver: ConfigReceiver) {
+    fun getConfig(listener: (Config) -> Unit) {
         Fuel.get("/config").responseObject(Config.Deserializer()) { req, resp, res ->
             val (config,error) = res
             if(config != null)
-                receiver.onConfigReceived(config)
-            else
-                receiver.onError("Could not get configuration for this bridge")
+                listener(config)
         }
     }
 
