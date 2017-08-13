@@ -1,4 +1,4 @@
-package nu.cliffords.khue.classes
+package nu.cliffords.khue
 
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.google.gson.Gson
@@ -16,11 +16,11 @@ class Config(val name: String, val zigbeechannel: Int, val bridgeid: String, val
              val apiversion: String, val swupdate: SWUpdate, val linkbutton: Boolean,
              val portalservices: Boolean, val portalconnection: Boolean, val portalstate: PortalState,
              val internetservices: InternetServices, val factorynew: Boolean, val replacesbridgeid: Int?,
-             val backup: Backup, val starterkitid: String, val whitelist: Map<String,WhiteList>) {
+             val backup: Backup, val starterkitid: String, val whitelist: Map<String, WhiteList>) {
 
     //Config Deserializer
     class Deserializer : ResponseDeserializable<Config> {
-        override fun deserialize(content: String) : Config{
+        override fun deserialize(content: String) : Config {
             val config = Gson().fromJson<Config>(content, Config::class.java)
             return config
         }
@@ -29,7 +29,7 @@ class Config(val name: String, val zigbeechannel: Int, val bridgeid: String, val
     data class DeviceTypes(val bridge: Boolean, val lights: Array<Int>, val sensors: Array<Int>)
 
     data class SWUpdate(val updatestate: Int, val checkforupdates: Boolean, val deviceTypes: DeviceTypes,
-                              val url:String, val text: String, val notify: Boolean){
+                        val url:String, val text: String, val notify: Boolean){
         companion object {
 
         }

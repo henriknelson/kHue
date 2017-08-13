@@ -1,8 +1,5 @@
-package nu.cliffords.khue.classes
+package nu.cliffords.khue
 
-import android.util.Log
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
@@ -11,7 +8,7 @@ import com.google.gson.reflect.TypeToken
 /**
  * Created by Henrik Nelson on 2017-08-12.
  */
-class Group(val name: String, val lights: Array<String>,val type:Type,val action: GroupAction) {
+class Group(val name: String, val lights: Array<String>, val type: Type, val action: GroupAction) {
 
     var groupId: String = ""
 
@@ -50,7 +47,7 @@ class Group(val name: String, val lights: Array<String>,val type:Type,val action
     class ListDeserializer : ResponseDeserializable<List<Group>> {
         override fun deserialize(content: String) : List<Group>{
             val groupListType = object : TypeToken<Map<String, Group>>(){}.type
-            val groups = Gson().fromJson<Map<String,Group>>(content, groupListType)
+            val groups = Gson().fromJson<Map<String, Group>>(content, groupListType)
             groups.forEach { key, value ->
                 value.groupId = key
             }
@@ -60,7 +57,7 @@ class Group(val name: String, val lights: Array<String>,val type:Type,val action
 
     //Group Deserializer
     class Deserializer : ResponseDeserializable<Group> {
-        override fun deserialize(content: String) : Group{
+        override fun deserialize(content: String) : Group {
             val group = Gson().fromJson<Group>(content, Group::class.java)
             return group
         }

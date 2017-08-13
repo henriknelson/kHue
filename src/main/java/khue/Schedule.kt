@@ -1,4 +1,4 @@
-package nu.cliffords.khue.classes
+package nu.cliffords.khue
 
 /**
  * Created by henrik on 2017-08-13.
