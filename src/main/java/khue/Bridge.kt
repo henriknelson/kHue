@@ -17,11 +17,11 @@ class Bridge(val ipAddress: String,val userName: String) {
         FuelManager.instance.basePath = "http://$ipAddress/api/$userName"
         FuelManager.instance.baseHeaders = mapOf("Content-Type" to "application/json")
         FuelManager.instance.addRequestInterceptor { request ->
-            Log.d("Bridge",request.toString())
+            Log.d("kHue",request.toString())
             request
         }
         FuelManager.instance.addResponseInterceptor { response ->
-            Log.d("Bridge",response.toString())
+            Log.d("kHue",response.toString())
             response
         }
     }
@@ -219,14 +219,14 @@ class Bridge(val ipAddress: String,val userName: String) {
             Fuel.put("/config").body(paramsJson).responseJson { request, response, result ->
                 val (value, error) = result
                 if (value != null) {
-                    Log.d("Bridge", "Config updated ok!")
-                    Log.d("Bridge","Config results: " + value.toString())
+                    Log.d("kHue", "Config updated ok!")
+                    Log.d("kHue","Config results: " + value.toString())
                 } else {
-                    Log.d("Bridge", "ERROR - Could not update config")
+                    Log.d("kHue", "ERROR - Could not update config")
                 }
             }
         }catch(e:Exception){
-            Log.d("Bridge","Error: $e")
+            Log.d("kHue","Error: $e")
         }
 
     }
